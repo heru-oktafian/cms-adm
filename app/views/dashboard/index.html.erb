@@ -1,0 +1,22 @@
+<div class="min-h-screen bg-slate-950 text-white px-6 py-10">
+  <div class="mx-auto max-w-6xl">
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <p class="text-sm uppercase tracking-[0.3em] text-slate-400">CMS Admin</p>
+        <h1 class="mt-2 text-3xl font-semibold">Dashboard</h1>
+        <p class="mt-2 text-sm text-slate-400">Login berhasil. Token JWT sedang disimpan di cookie browser dan divalidasi ke backend.</p>
+      </div>
+
+      <%= button_to "Logout", logout_path, method: :delete, class: "rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800" %>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <% ["Profile", "Projects", "Skills", "Experiences"].each do |item| %>
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+          <p class="text-sm text-slate-400"><%= item %></p>
+          <p class="mt-3 text-lg font-medium text-white">Coming soon</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
