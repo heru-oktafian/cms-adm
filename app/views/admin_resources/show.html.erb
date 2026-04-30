@@ -1,0 +1,103 @@
+<div class="min-h-screen bg-slate-100 text-slate-900 lg:flex">
+  <aside class="relative overflow-hidden bg-slate-950 text-white lg:w-72 xl:w-80">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_48%)]"></div>
+    <div class="relative flex h-full flex-col px-5 py-6 sm:px-6 lg:px-6 xl:px-8">
+      <div class="mb-8 flex items-center gap-3">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/20 p-2 ring-1 ring-white/10 shadow-[0_8px_20px_rgba(14,165,233,0.18)]">
+          <%= image_tag "/icon.png", alt: "cms-adm logo", class: "h-7 w-7 object-contain" %>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-200/70">cms-adm</p>
+          <p class="mt-1 text-sm text-slate-300">Portfolio control panel</p>
+        </div>
+      </div>
+
+      <nav class="space-y-2">
+        <% navigation_items.each do |item| %>
+          <% active = active_nav_key == item[:key] %>
+          <%= link_to item[:path], class: "flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition #{active ? 'bg-sky-500 text-slate-950 shadow-lg shadow-sky-500/20' : 'text-slate-300 hover:bg-white/5 hover:text-white'}" do %>
+            <span><%= item[:label] %></span>
+            <span class="h-2 w-2 rounded-full <%= active ? 'bg-slate-950/80' : 'bg-slate-600' %>"></span>
+          <% end %>
+        <% end %>
+      </nav>
+
+      <div class="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+        <p class="text-xs uppercase tracking-[0.3em] text-sky-200/70">System</p>
+        <p class="mt-4 text-2xl font-semibold text-white"><%= @resource[:title] %></p>
+        <p class="mt-2 text-sm leading-6 text-slate-300/90"><%= @resource[:summary] %></p>
+      </div>
+
+      <div class="mt-auto pt-8">
+        <%= button_to "Logout", logout_path, method: :delete, class: "w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10" %>
+      </div>
+    </div>
+  </aside>
+
+  <main class="flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
+    <div class="mx-auto max-w-7xl space-y-6">
+      <header class="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-6 lg:px-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-600"><%= @resource[:title] %></p>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl"><%= @resource[:title] %> manager</h1>
+        <p class="mt-3 text-sm leading-7 text-slate-500 sm:text-base"><%= @resource[:summary] %></p>
+      </header>
+
+      <section class="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_360px]">
+        <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)] sm:p-6">
+          <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-600">Backend data</p>
+              <h2 class="mt-2 text-2xl font-semibold text-slate-950">Live API response</h2>
+            </div>
+            <span class="rounded-full px-3 py-1.5 text-xs font-medium <%= @data[:status] == :ok ? 'bg-emerald-50 text-emerald-600' : @data[:status] == :pending ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600' %>"><%= @data[:status].to_s.humanize %></span>
+          </div>
+
+          <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <p class="text-sm text-slate-500"><%= @data[:message] %></p>
+
+            <% if @data[:items].present? %>
+              <div class="mt-5 space-y-3">
+                <% @data[:items].each_with_index do |item, index| %>
+                  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Item <%= index + 1 %></p>
+                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                      <% item.each do |key, value| %>
+                        <div>
+                          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"><%= key.to_s.humanize %></p>
+                          <p class="mt-1 break-words text-sm text-slate-700"><%= value.present? ? value : '-' %></p>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-6 text-sm text-slate-500">
+                Belum ada data untuk ditampilkan di modul ini.
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
+            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-600">Endpoint</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">API target</h2>
+            <div class="mt-5 rounded-2xl bg-slate-50 px-4 py-4 text-sm text-slate-700">
+              <code class="break-all"><%= @resource[:endpoint] || 'Not available yet' %></code>
+            </div>
+          </div>
+
+          <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
+            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-600">Next step</p>
+            <div class="mt-5 space-y-3 text-sm text-slate-600">
+              <div class="rounded-2xl bg-slate-50 px-4 py-3">Hubungkan halaman ini ke form create/update per modul.</div>
+              <div class="rounded-2xl bg-slate-50 px-4 py-3">Tambahkan action edit/delete setelah struktur data final.</div>
+              <div class="rounded-2xl bg-slate-50 px-4 py-3">Untuk Media, backend upload/gallery masih menunggu implementasi.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>

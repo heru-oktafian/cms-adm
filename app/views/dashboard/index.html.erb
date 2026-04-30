@@ -1,22 +1,180 @@
-<div class="min-h-screen bg-slate-950 text-white px-6 py-10">
-  <div class="mx-auto max-w-6xl">
-    <div class="mb-8 flex items-center justify-between">
-      <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-slate-400">CMS Admin</p>
-        <h1 class="mt-2 text-3xl font-semibold">Dashboard</h1>
-        <p class="mt-2 text-sm text-slate-400">Login berhasil. Token JWT sedang disimpan di cookie browser dan divalidasi ke backend.</p>
+<div class="min-h-screen bg-slate-100 text-slate-900 lg:flex">
+  <aside class="relative overflow-hidden bg-slate-950 text-white lg:w-72 xl:w-80">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_48%)]"></div>
+    <div class="relative flex h-full flex-col px-5 py-6 sm:px-6 lg:px-6 xl:px-8">
+      <div class="mb-8 flex items-center gap-3">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/20 p-2 ring-1 ring-white/10 shadow-[0_8px_20px_rgba(14,165,233,0.18)]">
+          <%= image_tag "/icon.png", alt: "cms-adm logo", class: "h-7 w-7 object-contain" %>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-200/70">cms-adm</p>
+          <p class="mt-1 text-sm text-slate-300">Portfolio control panel</p>
+        </div>
       </div>
 
-      <%= button_to "Logout", logout_path, method: :delete, class: "rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800" %>
-    </div>
+      <nav class="space-y-2">
+        <% navigation_items.each do |item| %>
+          <% active = active_nav_key == item[:key] %>
+          <%= link_to item[:path], class: "flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition #{active ? 'bg-sky-500 text-slate-950 shadow-lg shadow-sky-500/20' : 'text-slate-300 hover:bg-white/5 hover:text-white'}" do %>
+            <span><%= item[:label] %></span>
+            <span class="h-2 w-2 rounded-full <%= active ? 'bg-slate-950/80' : 'bg-slate-600' %>"></span>
+          <% end %>
+        <% end %>
+      </nav>
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <% ["Profile", "Projects", "Skills", "Experiences"].each do |item| %>
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-          <p class="text-sm text-slate-400"><%= item %></p>
-          <p class="mt-3 text-lg font-medium text-white">Coming soon</p>
-        </div>
-      <% end %>
+      <div class="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+        <p class="text-xs uppercase tracking-[0.3em] text-sky-200/70">System</p>
+        <p class="mt-4 text-2xl font-semibold text-white">API Connected</p>
+        <p class="mt-2 text-sm leading-6 text-slate-300/90">Admin panel terhubung ke backend portfolio CMS dan siap dipakai mengelola konten utama.</p>
+      </div>
+
+      <div class="mt-auto pt-8">
+        <%= button_to "Logout", logout_path, method: :delete, class: "w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10" %>
+      </div>
     </div>
-  </div>
+  </aside>
+
+  <main class="flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
+    <div class="mx-auto max-w-7xl space-y-6">
+      <header class="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-6 lg:px-8">
+        <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+          <div class="w-full">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-sky-600">Dashboard</span>
+              <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">Live workspace</span>
+            </div>
+            <h1 class="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Welcome back, Admin</h1>
+            <p class="mt-3 w-full text-sm leading-7 text-slate-500 sm:text-base">
+              Monitor konten portfolio kamu, cek ringkasan data, dan lanjutkan pengelolaan modul dari satu dashboard yang bersih, responsif, dan lebih premium.
+            </p>
+          </div>
+
+          <div class="flex w-full flex-col gap-3 xl:max-w-xl xl:items-end">
+            <div class="flex w-full flex-col gap-3 lg:flex-row lg:items-stretch xl:justify-end">
+              <div class="w-full lg:min-w-0 lg:flex-1">
+                <label class="sr-only" for="dashboard-search">Search</label>
+                <div class="flex h-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm transition focus-within:border-sky-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100">
+                  <span class="text-slate-400">⌕</span>
+                  <input id="dashboard-search" type="text" placeholder="Search modules or content..." class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400">
+                </div>
+              </div>
+            </div>
+
+            <div class="grid w-full gap-3 sm:grid-cols-2 xl:max-w-xl">
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-sm">
+                <p class="text-xs uppercase tracking-[0.28em] text-slate-400">Environment</p>
+                <p class="mt-2 font-semibold text-slate-900">Local development workspace</p>
+              </div>
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-sm">
+                <p class="text-xs uppercase tracking-[0.28em] text-slate-400">Backend</p>
+                <p class="mt-2 font-semibold text-slate-900">Connected to cms-be API</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <% stats = [
+          ["Profile", "01", "Main identity configured"],
+          ["Projects", "01", "Core portfolio collection"],
+          ["Skills", "01", "Technology overview"],
+          ["Experiences", "01", "Career timeline ready"]
+        ] %>
+
+        <% stats.each do |label, value, note| %>
+          <div class="rounded-[26px] border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(14,165,233,0.12)]">
+            <div class="flex items-start justify-between gap-4">
+              <p class="text-sm font-medium text-slate-500"><%= label %></p>
+              <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-600">Live</span>
+            </div>
+            <div class="mt-5 flex items-end justify-between gap-4">
+              <p class="text-4xl font-semibold tracking-tight text-slate-950"><%= value %></p>
+              <div class="h-12 w-12 rounded-2xl bg-slate-950/5"></div>
+            </div>
+            <p class="mt-4 text-sm leading-6 text-slate-500"><%= note %></p>
+          </div>
+        <% end %>
+      </section>
+
+      <section class="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.9fr)]">
+        <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.05)] sm:p-6">
+          <div class="mb-5 flex items-center justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-600">Overview</p>
+              <h2 class="mt-2 text-2xl font-semibold text-slate-950">Module status</h2>
+            </div>
+            <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-500">Core API connected</span>
+          </div>
+
+          <div class="overflow-hidden rounded-[24px] border border-slate-200">
+            <div class="grid grid-cols-[1.1fr_0.8fr_0.8fr] bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 sm:px-5">
+              <span>Module</span>
+              <span>Status</span>
+              <span>Action</span>
+            </div>
+
+            <% rows = [
+              ["Profile", "Ready", admin_resource_path("profile")],
+              ["Projects", "Ready", admin_resource_path("projects")],
+              ["Skills", "Ready", admin_resource_path("skills")],
+              ["Experiences", "Ready", admin_resource_path("experiences")],
+              ["Social Links", "Ready", admin_resource_path("social_links")]
+            ] %>
+
+            <% rows.each_with_index do |row, index| %>
+              <div class="grid grid-cols-[1.1fr_0.8fr_0.8fr] items-center px-4 py-4 text-sm <%= index.even? ? 'bg-white' : 'bg-slate-50/60' %> sm:px-5">
+                <span class="font-medium text-slate-900"><%= row[0] %></span>
+                <span>
+                  <span class="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600"><%= row[1] %></span>
+                </span>
+                <%= link_to "Manage", row[2], class: "text-sky-600 transition hover:text-sky-700" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
+            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-600">Progress</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">System readiness</h2>
+
+            <div class="mt-8 flex items-center justify-center">
+              <div class="relative flex h-52 w-52 items-center justify-center rounded-full bg-[conic-gradient(from_180deg,_#0f172a_0deg,_#0ea5e9_210deg,_#dbeafe_210deg,_#dbeafe_360deg)] p-4">
+                <div class="flex h-full w-full flex-col items-center justify-center rounded-full bg-white text-center">
+                  <p class="text-5xl font-semibold text-slate-950">78%</p>
+                  <p class="mt-2 text-sm text-slate-500">Core modules ready</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 grid gap-3 text-sm text-slate-500">
+              <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                <span>Authentication</span>
+                <span class="font-semibold text-slate-900">Ready</span>
+              </div>
+              <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                <span>Core CRUD APIs</span>
+                <span class="font-semibold text-slate-900">Ready</span>
+              </div>
+              <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                <span>Media Library</span>
+                <span class="font-semibold text-slate-900">Pending</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.05)]">
+            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-600">Quick access</p>
+            <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              <% quick_links = [["Edit Profile", admin_resource_path("profile")], ["Manage Projects", admin_resource_path("projects")], ["Update Skills", admin_resource_path("skills")], ["Review Experiences", admin_resource_path("experiences")]] %>
+              <% quick_links.each do |item, path| %>
+                <%= link_to item, path, class: "block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
 </div>

@@ -5,4 +5,9 @@
 import { application } from "./application"
 
 import HelloController from "./hello_controller"
+import SidebarController from "./sidebar_controller"
+import DatatableFilterController from "./datatable_filter_controller"
+
 application.register("hello", HelloController)
+application.register("sidebar", SidebarController)
+application.register("datatable-filter", DatatableFilterController)
