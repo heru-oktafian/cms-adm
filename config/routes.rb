@@ -11,6 +11,9 @@ Rails.application.routes.draw do
   post "/admin/projects", to: "admin_resources#create_project", as: :create_admin_project
   patch "/admin/projects/:id", to: "admin_resources#update_project", as: :update_admin_project
   delete "/admin/projects/:id", to: "admin_resources#destroy_project", as: :destroy_admin_project
+  post "/admin/skills", to: "admin_resources#create_skill", as: :create_admin_skill
+  patch "/admin/skills/:id", to: "admin_resources#update_skill", as: :update_admin_skill
+  delete "/admin/skills/:id", to: "admin_resources#destroy_skill", as: :destroy_admin_skill
 
   root "sessions#new"
 end

@@ -98,6 +98,42 @@ class AdminResourcesController < ApplicationController
     end
   end
 
+  def create_skill
+    @resource_key = "skills"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_skill(:post, @resource[:endpoint], skill_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :created
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def update_skill
+    @resource_key = "skills"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_skill(:patch, "#{@resource[:endpoint]}/#{params[:id]}", skill_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy_skill
+    @resource_key = "skills"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = delete_resource("#{@resource[:endpoint]}/#{params[:id]}")
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
 
   private
 
@@ -244,6 +280,27 @@ class AdminResourcesController < ApplicationController
   def project_params
     permitted = params.require(:project).permit(:title, :slug, :summary, :description, :thumbnail_path, :project_url, :repo_url, :sort_order, :is_featured).to_h
     permitted["is_featured"] = ActiveModel::Type::Boolean.new.cast(permitted["is_featured"])
+    permitted["sort_order"] = permitted["sort_order"].to_i
+    permitted
+  end
+
+  def submit_skill(method, path, payload)
+    uri = URI.parse("#{backend_base_url}#{path}")
+    request = build_json_request(method, uri, payload)
+    response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(request) }
+    parsed = safe_json(response.body)
+
+    if response.code.to_i.between?(200, 299)
+      { status: :ok, message: parsed["message"].presence || "Skill saved." }
+    else
+      { status: :error, message: parsed["message"].presence || "Gagal menyimpan skill." }
+    end
+  rescue StandardError => e
+    { status: :error, message: "Gagal terhubung ke backend: #{e.message}" }
+  end
+
+  def skill_params
+    permitted = params.require(:skill).permit(:name, :level, :icon_path, :sort_order).to_h
     permitted["sort_order"] = permitted["sort_order"].to_i
     permitted
   end
