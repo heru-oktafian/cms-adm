@@ -20,8 +20,15 @@
       ["Platform", ->(item) { item["platform"].presence || "-" }],
       ["Label", ->(item) { item["label"].presence || "-" }],
       ["URL", ->(item) { item["url"].presence || "-" }],
-      ["Sort", ->(item) { item["sort_order"].presence || 0 }],
-      ["Updated", ->(item) { item["updated_at"].presence || "-" }]
+      ["Sort", ->(item) { item["sort_order"].presence || 0 }]
+    ]
+  when "tools"
+    [
+      ["Name", ->(item) { item["name"].presence || "-" }],
+      ["Icon", ->(item) { item["icon_path"].presence || "-" }],
+      ["URL", ->(item) { item["url"].presence || "-" }],
+      ["Active", ->(item) { item["is_active"] ? "Yes" : "No" }],
+      ["Sort", ->(item) { item["sort_order"].presence || 0 }]
     ]
   else
     [
@@ -78,7 +85,10 @@
       <%= project_mode ? 'data-project-search-root data-project-modal-root' : '' %>
       <%= project_mode ? "data-project-create-path=\"#{create_admin_project_path}\" data-project-update-base=\"/admin/projects\" data-project-delete-base=\"/admin/projects\" data-login-path=\"#{login_path}\"".html_safe : '' %>
       <%= @resource_key == 'skills' ? "data-skill-create-path=\"#{create_admin_skill_path}\" data-skill-update-base=\"/admin/skills\" data-skill-delete-base=\"/admin/skills\" data-login-path=\"#{login_path}\"".html_safe : '' %>
-      <%= generic_filter_mode ? "data-resource-table-root data-resource-mode=\"#{@resource_key}\"".html_safe : '' %>>
+      <%= @resource_key == 'experiences' ? "data-experience-create-path=\"#{create_admin_experience_path}\" data-experience-update-base=\"/admin/experiences\" data-experience-delete-base=\"/admin/experiences\" data-login-path=\"#{login_path}\"".html_safe : '' %>
+      <%= @resource_key == 'social_links' ? "data-social-link-create-path=\"#{create_admin_social_link_path}\" data-social-link-update-base=\"/admin/social-links\" data-social-link-delete-base=\"/admin/social-links\" data-login-path=\"#{login_path}\"".html_safe : '' %>
+      <%= @resource_key == 'tools' ? "data-tool-create-path=\"#{create_admin_tool_path}\" data-tool-update-base=\"/admin/tools\" data-tool-delete-base=\"/admin/tools\" data-login-path=\"#{login_path}\"".html_safe : '' %>
+      <%= (generic_filter_mode || @resource_key == 'tools') ? "data-resource-table-root data-resource-mode=\"#{@resource_key}\"".html_safe : '' %>>
       <header class="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-6 lg:px-8">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-600"><%= @resource[:title] %></p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl"><%= @resource[:title] %> data table</h1>
@@ -112,7 +122,7 @@
             </div>
             <p data-project-debug class="mt-4 text-xs text-slate-400">Filter debug idle</p>
           </div>
-        <% elsif generic_filter_mode %>
+        <% elsif generic_filter_mode || @resource_key == 'tools' %>
           <div class="mt-5 rounded-[24px] border border-slate-200 bg-slate-50 p-4 sm:p-5">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end">
               <div class="flex-1">
@@ -147,6 +157,10 @@
                 <button type="button" onclick="document.getElementById('skill-create-modal').classList.remove('hidden')" class="rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white">Create Skill</button>
               <% elsif @resource_key == 'experiences' %>
                 <button type="button" onclick="document.getElementById('experience-create-modal').classList.remove('hidden')" class="rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white">Create Experience</button>
+              <% elsif @resource_key == 'tools' %>
+                <button type="button" onclick="document.getElementById('tool-create-modal').classList.remove('hidden')" class="rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white">Create Tool</button>
+              <% elsif @resource_key == 'social_links' %>
+                <button type="button" onclick="document.getElementById('social-link-create-modal').classList.remove('hidden')" class="rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white">Create Social Link</button>
               <% end %>
               <span class="rounded-full px-3 py-1.5 text-xs font-medium <%= @data[:status] == :ok ? 'bg-emerald-50 text-emerald-600' : @data[:status] == :pending ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600' %>"><%= @data[:status].to_s.humanize %></span>
             </div>
@@ -163,13 +177,13 @@
                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 sm:px-5">Action</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 bg-white" <%= project_mode ? 'data-project-table-body' : '' %> <%= generic_filter_mode ? 'data-resource-table-body' : '' %>>
+                <tbody class="divide-y divide-slate-200 bg-white" <%= project_mode ? 'data-project-table-body' : '' %> <%= (generic_filter_mode || @resource_key == 'tools') ? 'data-resource-table-body' : '' %>>
                   <% if @data[:items].present? %>
                     <% @data[:items].each do |item| %>
                       <% generic_title = (item['name'] || item['company'] || item['platform'] || item['title']).to_s.downcase %>
                       <tr class="transition hover:bg-slate-50/80"
                         <%= project_mode ? "data-project-row data-featured=\"#{item['is_featured'] ? 'true' : 'false'}\" data-title=\"#{ERB::Util.html_escape(item['title'].to_s.downcase)}\" data-sort-order=\"#{item['sort_order'].to_i}\" data-updated-at=\"#{ERB::Util.html_escape(item['updated_at'].to_s)}\"" : '' %>
-                        <%= generic_filter_mode ? "data-resource-row data-title=\"#{ERB::Util.html_escape(generic_title)}\" data-sort-order=\"#{item['sort_order'].to_i}\" data-updated-at=\"#{ERB::Util.html_escape(item['updated_at'].to_s)}\"" : '' %>>
+                        <%= (generic_filter_mode || @resource_key == 'tools') ? "data-resource-row data-title=\"#{ERB::Util.html_escape(generic_title)}\" data-sort-order=\"#{item['sort_order'].to_i}\" data-updated-at=\"#{ERB::Util.html_escape(item['updated_at'].to_s)}\"" : '' %>>
                         <% columns.each do |_, renderer| %>
                           <td class="px-4 py-4 align-top text-slate-700 sm:px-5"><%= renderer.call(item) %></td>
                         <% end %>
@@ -183,6 +197,21 @@
                             <div class="flex flex-wrap gap-2">
                               <button type="button" data-skill-edit data-skill-payload="<%= ERB::Util.html_escape(item.to_json) %>" class="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-600">Edit</button>
                               <button type="button" data-skill-delete data-skill-payload="<%= ERB::Util.html_escape(item.to_json) %>" class="inline-flex rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">Delete</button>
+                            </div>
+                          <% elsif @resource_key == 'experiences' %>
+                            <div class="flex flex-wrap gap-2">
+                              <button type="button" data-experience-edit data-experience-payload="<%= ERB::Util.html_escape(item.to_json) %>" class="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-600">Edit</button>
+                              <button type="button" data-experience-delete data-experience-payload="<%= ERB::Util.html_escape(item.to_json) %>" class="inline-flex rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">Delete</button>
+                            </div>
+                          <% elsif @resource_key == 'social_links' %>
+                            <div class="flex flex-wrap gap-2">
+                              <button type="button" data-social-link-edit data-social-link-payload="<%= ERB::Util.html_escape(item.to_json) %>" class="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-600">Edit</button>
+                              <button type="button" data-social-link-delete data-social-link-payload="<%= ERB::Util.html_escape(item.to_json) %>" class="inline-flex rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">Delete</button>
+                            </div>
+                          <% elsif @resource_key == 'tools' %>
+                            <div class="flex flex-wrap gap-2">
+                              <button type="button" data-tool-edit data-tool-payload="<%= ERB::Util.html_escape(item.to_json) %>" class="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-600">Edit</button>
+                              <button type="button" data-tool-delete data-tool-payload="<%= ERB::Util.html_escape(item.to_json) %>" class="inline-flex rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">Delete</button>
                             </div>
                           <% else %>
                             <span class="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-600">Soon</span>
@@ -200,7 +229,7 @@
                     <tr data-project-empty-state class="hidden">
                       <td colspan="<%= columns.length + 1 %>" class="px-4 py-8 text-center text-sm text-slate-500 sm:px-5">Tidak ada project yang cocok dengan filter saat ini.</td>
                     </tr>
-                  <% elsif generic_filter_mode && @data[:items].present? %>
+                  <% elsif (generic_filter_mode || @resource_key == 'tools') && @data[:items].present? %>
                     <tr data-resource-empty-state class="hidden">
                       <td colspan="<%= columns.length + 1 %>" class="px-4 py-8 text-center text-sm text-slate-500 sm:px-5">Tidak ada data yang cocok dengan filter saat ini.</td>
                     </tr>
@@ -234,47 +263,469 @@
         <div id="experience-create-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
           <div class="w-full max-w-3xl rounded-[28px] bg-white p-5 shadow-2xl sm:p-6">
             <div class="mb-5 flex items-center justify-between gap-4">
-              <h3 class="text-2xl font-semibold text-slate-950">Create Experience</h3>
+              <h3 id="experience-modal-title" class="text-2xl font-semibold text-slate-950">Create Experience</h3>
               <button type="button" onclick="document.getElementById('experience-create-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-600">Close</button>
             </div>
-            <div class="grid gap-5 md:grid-cols-2">
-              <div>
-                <label class="mb-2 block text-sm font-medium text-slate-700">Company</label>
-                <input type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+            <form id="experience-create-form" class="space-y-5">
+              <div id="experience-create-feedback" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+              <div class="grid gap-5 md:grid-cols-2">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Company</label>
+                  <input id="experience-company-field" name="experience[company]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Position</label>
+                  <input id="experience-position-field" name="experience[position]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Start date</label>
+                  <input id="experience-start-field" name="experience[start_date]" type="text" data-experience-date-field placeholder="dd/mm/yyyy" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">End date</label>
+                  <input id="experience-end-field" name="experience[end_date]" type="text" data-experience-date-field placeholder="dd/mm/yyyy" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Description</label>
+                  <textarea id="experience-description-field" name="experience[description]" rows="5" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800"></textarea>
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Sort order</label>
+                  <input id="experience-sort-field" name="experience[sort_order]" type="number" value="0" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <input id="experience-current-field" name="experience[is_current]" type="checkbox" value="true">
+                    <span>Current position</span>
+                  </label>
+                </div>
               </div>
-              <div>
-                <label class="mb-2 block text-sm font-medium text-slate-700">Position</label>
-                <input type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+              <div class="mt-6 flex flex-wrap gap-3">
+                <button id="experience-create-submit" type="submit" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-medium text-white">Create Experience</button>
+                <button type="button" onclick="document.getElementById('experience-create-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700">Cancel</button>
               </div>
-              <div>
-                <label class="mb-2 block text-sm font-medium text-slate-700">Start date</label>
-                <input type="date" lang="id-ID" placeholder="dd/mm/yyyy" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
-              </div>
-              <div>
-                <label class="mb-2 block text-sm font-medium text-slate-700">End date</label>
-                <input type="date" lang="id-ID" placeholder="dd/mm/yyyy" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
-              </div>
-              <div class="md:col-span-2">
-                <label class="mb-2 block text-sm font-medium text-slate-700">Description</label>
-                <textarea rows="5" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800"></textarea>
-              </div>
-              <div>
-                <label class="mb-2 block text-sm font-medium text-slate-700">Sort order</label>
-                <input type="number" value="0" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
-              </div>
-              <div>
-                <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                  <input type="checkbox">
-                  <span>Current position</span>
-                </label>
-              </div>
-            </div>
+            </form>
+          </div>
+        </div>
+        <script>
+          (function () {
+            const form = document.getElementById('experience-create-form');
+            if (!form || form.dataset.bound === 'true') return;
+            form.dataset.bound = 'true';
+
+            const root = document.querySelector('[data-experience-create-path]');
+            const feedback = document.getElementById('experience-create-feedback');
+            const modal = document.getElementById('experience-create-modal');
+            const title = document.getElementById('experience-modal-title');
+            const submit = document.getElementById('experience-create-submit');
+            const companyField = document.getElementById('experience-company-field');
+            const positionField = document.getElementById('experience-position-field');
+            const startField = document.getElementById('experience-start-field');
+            const endField = document.getElementById('experience-end-field');
+            const descriptionField = document.getElementById('experience-description-field');
+            const sortField = document.getElementById('experience-sort-field');
+            const currentField = document.getElementById('experience-current-field');
+
+            document.querySelectorAll('[data-experience-edit]').forEach((button) => {
+              button.addEventListener('click', function () {
+                const experience = JSON.parse(button.dataset.experiencePayload);
+                form.dataset.mode = 'edit';
+                form.dataset.action = `${root.dataset.experienceUpdateBase}/${experience.id}`;
+                if (title) title.textContent = 'Edit Experience';
+                if (submit) submit.textContent = 'Update Experience';
+                if (companyField) companyField.value = experience.company || '';
+                if (positionField) positionField.value = experience.position || '';
+                if (startField) startField.value = experience.start_date || '';
+                if (endField) endField.value = experience.end_date || '';
+                if (descriptionField) descriptionField.value = experience.description || '';
+                if (sortField) sortField.value = experience.sort_order || 0;
+                if (currentField) currentField.checked = !!experience.is_current;
+                if (feedback) feedback.classList.add('hidden');
+                modal.classList.remove('hidden');
+              });
+            });
+
+            form.addEventListener('submit', async function (event) {
+              event.preventDefault();
+              const formData = new FormData(form);
+              const method = form.dataset.mode === 'edit' ? 'PATCH' : 'POST';
+              const action = form.dataset.mode === 'edit' ? form.dataset.action : root.dataset.experienceCreatePath;
+              try {
+                const response = await fetch(action, {
+                  method,
+                  headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json'
+                  },
+                  body: formData
+                });
+                const payload = await response.json();
+                if (response.status === 401) {
+                  window.location.href = root.dataset.loginPath || '/login';
+                  return;
+                }
+                if (!response.ok) {
+                  feedback.textContent = payload.message || 'Gagal menyimpan experience.';
+                  feedback.className = 'rounded-2xl px-4 py-3 text-sm bg-rose-50 text-rose-600';
+                  feedback.classList.remove('hidden');
+                  return;
+                }
+                window.location.href = '/admin/experiences';
+              } catch (error) {
+                feedback.textContent = `Gagal mengirim request: ${error.message}`;
+                feedback.className = 'rounded-2xl px-4 py-3 text-sm bg-rose-50 text-rose-600';
+                feedback.classList.remove('hidden');
+              }
+            });
+          })();
+        </script>
+        <div id="experience-delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
+          <div class="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl">
+            <h3 class="text-2xl font-semibold text-slate-950">Delete experience</h3>
+            <p id="experience-delete-text" class="mt-4 text-sm leading-7 text-slate-600">Apakah anda yakin akan menghapus experience ini?</p>
             <div class="mt-6 flex flex-wrap gap-3">
-              <button type="button" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-medium text-white">Create Experience</button>
-              <button type="button" onclick="document.getElementById('experience-create-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700">Cancel</button>
+              <button id="experience-delete-confirm" type="button" class="rounded-2xl bg-rose-600 px-5 py-3 text-sm font-medium text-white">Ya, hapus</button>
+              <button type="button" onclick="document.getElementById('experience-delete-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700">Tidak</button>
             </div>
           </div>
         </div>
+        <script>
+          (function () {
+            const root = document.querySelector('[data-experience-delete-base]');
+            if (!root) return;
+            const deleteModal = document.getElementById('experience-delete-modal');
+            const deleteText = document.getElementById('experience-delete-text');
+            const deleteConfirm = document.getElementById('experience-delete-confirm');
+            let deleteId = null;
+            document.querySelectorAll('[data-experience-delete]').forEach((button) => {
+              button.addEventListener('click', function () {
+                const experience = JSON.parse(button.dataset.experiencePayload);
+                deleteId = experience.id;
+                deleteText.textContent = `Apakah anda yakin akan menghapus Experience ${experience.company} ini?`;
+                deleteModal.classList.remove('hidden');
+              });
+            });
+            deleteConfirm?.addEventListener('click', async function () {
+              if (!deleteId) return;
+              const response = await fetch(`${root.dataset.experienceDeleteBase}/${deleteId}`, {
+                method: 'DELETE',
+                headers: {
+                  'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                  'Accept': 'application/json'
+                }
+              });
+              if (response.status === 401) {
+                window.location.href = root.dataset.loginPath || '/login';
+                return;
+              }
+              window.location.href = '/admin/experiences';
+            });
+          })();
+        </script>
+      <% end %>
+
+      <% if @resource_key == 'tools' %>
+        <div id="tool-create-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
+          <div class="w-full max-w-2xl rounded-[28px] bg-white p-5 shadow-2xl sm:p-6">
+            <div class="mb-5 flex items-center justify-between gap-4">
+              <h3 id="tool-modal-title" class="text-2xl font-semibold text-slate-950">Create Tool</h3>
+              <button type="button" onclick="document.getElementById('tool-create-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-600">Close</button>
+            </div>
+            <form id="tool-create-form" class="space-y-5">
+              <div id="tool-create-feedback" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+              <div class="grid gap-5 md:grid-cols-2">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Name</label>
+                  <input id="tool-name-field" name="tool[name]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Icon path</label>
+                  <input id="tool-icon-field" name="tool[icon_path]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="mb-2 block text-sm font-medium text-slate-700">URL</label>
+                  <input id="tool-url-field" name="tool[url]" type="url" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Sort order</label>
+                  <input id="tool-sort-field" name="tool[sort_order]" type="number" value="0" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <input id="tool-active-field" name="tool[is_active]" type="checkbox" value="true" checked>
+                    <span>Active</span>
+                  </label>
+                </div>
+              </div>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <button id="tool-create-submit" type="submit" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-medium text-white">Create Tool</button>
+              <button type="button" onclick="document.getElementById('tool-create-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <script>
+          (function () {
+            const form = document.getElementById('tool-create-form');
+            if (!form || form.dataset.bound === 'true') return;
+            form.dataset.bound = 'true';
+
+            const root = document.querySelector('[data-tool-create-path]');
+            const feedback = document.getElementById('tool-create-feedback');
+            const modal = document.getElementById('tool-create-modal');
+            const title = document.getElementById('tool-modal-title');
+            const submit = document.getElementById('tool-create-submit');
+            const nameField = document.getElementById('tool-name-field');
+            const iconField = document.getElementById('tool-icon-field');
+            const urlField = document.getElementById('tool-url-field');
+            const sortField = document.getElementById('tool-sort-field');
+            const activeField = document.getElementById('tool-active-field');
+
+            document.querySelectorAll('[data-tool-edit]').forEach((button) => {
+              button.addEventListener('click', function () {
+                const tool = JSON.parse(button.dataset.toolPayload);
+                form.dataset.mode = 'edit';
+                form.dataset.action = `${root.dataset.toolUpdateBase}/${tool.id}`;
+                if (title) title.textContent = 'Edit Tool';
+                if (submit) submit.textContent = 'Update Tool';
+                if (nameField) nameField.value = tool.name || '';
+                if (iconField) iconField.value = tool.icon_path || '';
+                if (urlField) urlField.value = tool.url || '';
+                if (sortField) sortField.value = tool.sort_order || 0;
+                if (activeField) activeField.checked = !!tool.is_active;
+                if (feedback) feedback.classList.add('hidden');
+                modal.classList.remove('hidden');
+              });
+            });
+
+            form.addEventListener('submit', async function (event) {
+              event.preventDefault();
+              const formData = new FormData(form);
+              const method = form.dataset.mode === 'edit' ? 'PATCH' : 'POST';
+              const action = form.dataset.mode === 'edit' ? form.dataset.action : root.dataset.toolCreatePath;
+              try {
+                const response = await fetch(action, {
+                  method,
+                  headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json'
+                  },
+                  body: formData
+                });
+                const payload = await response.json();
+                if (response.status === 401) {
+                  window.location.href = root.dataset.loginPath || '/login';
+                  return;
+                }
+                if (!response.ok) {
+                  feedback.textContent = payload.message || 'Gagal menyimpan tool.';
+                  feedback.className = 'rounded-2xl px-4 py-3 text-sm bg-rose-50 text-rose-600';
+                  feedback.classList.remove('hidden');
+                  return;
+                }
+                window.location.href = '/admin/tools';
+              } catch (error) {
+                feedback.textContent = `Gagal mengirim request: ${error.message}`;
+                feedback.className = 'rounded-2xl px-4 py-3 text-sm bg-rose-50 text-rose-600';
+                feedback.classList.remove('hidden');
+              }
+            });
+          })();
+        </script>
+        <div id="tool-delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
+          <div class="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl">
+            <h3 class="text-2xl font-semibold text-slate-950">Delete tool</h3>
+            <p id="tool-delete-text" class="mt-4 text-sm leading-7 text-slate-600">Apakah anda yakin akan menghapus tool ini?</p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <button id="tool-delete-confirm" type="button" class="rounded-2xl bg-rose-600 px-5 py-3 text-sm font-medium text-white">Ya, hapus</button>
+              <button type="button" onclick="document.getElementById('tool-delete-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700">Tidak</button>
+            </div>
+          </div>
+        </div>
+        <script>
+          (function () {
+            const root = document.querySelector('[data-tool-delete-base]');
+            if (!root) return;
+            const deleteModal = document.getElementById('tool-delete-modal');
+            const deleteText = document.getElementById('tool-delete-text');
+            const deleteConfirm = document.getElementById('tool-delete-confirm');
+            let deleteId = null;
+            document.querySelectorAll('[data-tool-delete]').forEach((button) => {
+              button.addEventListener('click', function () {
+                const tool = JSON.parse(button.dataset.toolPayload);
+                deleteId = tool.id;
+                deleteText.textContent = `Apakah anda yakin akan menghapus Tool ${tool.name} ini?`;
+                deleteModal.classList.remove('hidden');
+              });
+            });
+            deleteConfirm?.addEventListener('click', async function () {
+              if (!deleteId) return;
+              const response = await fetch(`${root.dataset.toolDeleteBase}/${deleteId}`, {
+                method: 'DELETE',
+                headers: {
+                  'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                  'Accept': 'application/json'
+                }
+              });
+              if (response.status === 401) {
+                window.location.href = root.dataset.loginPath || '/login';
+                return;
+              }
+              window.location.href = '/admin/tools';
+            });
+          })();
+        </script>
+      <% end %>
+
+      <% if @resource_key == 'social_links' %>
+        <div id="social-link-create-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
+          <div class="w-full max-w-2xl rounded-[28px] bg-white p-5 shadow-2xl sm:p-6">
+            <div class="mb-5 flex items-center justify-between gap-4">
+              <h3 id="social-link-modal-title" class="text-2xl font-semibold text-slate-950">Create Social Link</h3>
+              <button type="button" onclick="document.getElementById('social-link-create-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-600">Close</button>
+            </div>
+            <form id="social-link-create-form" class="space-y-5">
+              <div id="social-link-create-feedback" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+              <div class="grid gap-5 md:grid-cols-2">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Platform</label>
+                  <input id="social-link-platform-field" name="social_link[platform]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Label</label>
+                  <input id="social-link-label-field" name="social_link[label]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="mb-2 block text-sm font-medium text-slate-700">URL</label>
+                  <input id="social-link-url-field" name="social_link[url]" type="url" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Icon path</label>
+                  <input id="social-link-icon-field" name="social_link[icon_path]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Sort order</label>
+                  <input id="social-link-sort-field" name="social_link[sort_order]" type="number" value="0" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+              </div>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <button id="social-link-create-submit" type="submit" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-medium text-white">Create Social Link</button>
+              <button type="button" onclick="document.getElementById('social-link-create-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <script>
+          (function () {
+            const form = document.getElementById('social-link-create-form');
+            if (!form || form.dataset.bound === 'true') return;
+            form.dataset.bound = 'true';
+
+            const root = document.querySelector('[data-social-link-create-path]');
+            const feedback = document.getElementById('social-link-create-feedback');
+            const modal = document.getElementById('social-link-create-modal');
+            const title = document.getElementById('social-link-modal-title');
+            const submit = document.getElementById('social-link-create-submit');
+            const platformField = document.getElementById('social-link-platform-field');
+            const labelField = document.getElementById('social-link-label-field');
+            const urlField = document.getElementById('social-link-url-field');
+            const iconField = document.getElementById('social-link-icon-field');
+            const sortField = document.getElementById('social-link-sort-field');
+
+            document.querySelectorAll('[data-social-link-edit]').forEach((button) => {
+              button.addEventListener('click', function () {
+                const socialLink = JSON.parse(button.dataset.socialLinkPayload);
+                form.dataset.mode = 'edit';
+                form.dataset.action = `${root.dataset.socialLinkUpdateBase}/${socialLink.id}`;
+                if (title) title.textContent = 'Edit Social Link';
+                if (submit) submit.textContent = 'Update Social Link';
+                if (platformField) platformField.value = socialLink.platform || '';
+                if (labelField) labelField.value = socialLink.label || '';
+                if (urlField) urlField.value = socialLink.url || '';
+                if (iconField) iconField.value = socialLink.icon_path || '';
+                if (sortField) sortField.value = socialLink.sort_order || 0;
+                if (feedback) feedback.classList.add('hidden');
+                modal.classList.remove('hidden');
+              });
+            });
+
+            form.addEventListener('submit', async function (event) {
+              event.preventDefault();
+              const formData = new FormData(form);
+              const method = form.dataset.mode === 'edit' ? 'PATCH' : 'POST';
+              const action = form.dataset.mode === 'edit' ? form.dataset.action : root.dataset.socialLinkCreatePath;
+              try {
+                const response = await fetch(action, {
+                  method,
+                  headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json'
+                  },
+                  body: formData
+                });
+                const payload = await response.json();
+                if (response.status === 401) {
+                  window.location.href = root.dataset.loginPath || '/login';
+                  return;
+                }
+                if (!response.ok) {
+                  feedback.textContent = payload.message || 'Gagal menyimpan social link.';
+                  feedback.className = 'rounded-2xl px-4 py-3 text-sm bg-rose-50 text-rose-600';
+                  feedback.classList.remove('hidden');
+                  return;
+                }
+                window.location.href = '/admin/social_links';
+              } catch (error) {
+                feedback.textContent = `Gagal mengirim request: ${error.message}`;
+                feedback.className = 'rounded-2xl px-4 py-3 text-sm bg-rose-50 text-rose-600';
+                feedback.classList.remove('hidden');
+              }
+            });
+          })();
+        </script>
+        <div id="social-link-delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
+          <div class="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl">
+            <h3 class="text-2xl font-semibold text-slate-950">Delete social link</h3>
+            <p id="social-link-delete-text" class="mt-4 text-sm leading-7 text-slate-600">Apakah anda yakin akan menghapus social link ini?</p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <button id="social-link-delete-confirm" type="button" class="rounded-2xl bg-rose-600 px-5 py-3 text-sm font-medium text-white">Ya, hapus</button>
+              <button type="button" onclick="document.getElementById('social-link-delete-modal').classList.add('hidden')" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700">Tidak</button>
+            </div>
+          </div>
+        </div>
+        <script>
+          (function () {
+            const root = document.querySelector('[data-social-link-delete-base]');
+            if (!root) return;
+            const deleteModal = document.getElementById('social-link-delete-modal');
+            const deleteText = document.getElementById('social-link-delete-text');
+            const deleteConfirm = document.getElementById('social-link-delete-confirm');
+            let deleteId = null;
+            document.querySelectorAll('[data-social-link-delete]').forEach((button) => {
+              button.addEventListener('click', function () {
+                const socialLink = JSON.parse(button.dataset.socialLinkPayload);
+                deleteId = socialLink.id;
+                deleteText.textContent = `Apakah anda yakin akan menghapus Social Link ${socialLink.platform} ini?`;
+                deleteModal.classList.remove('hidden');
+              });
+            });
+            deleteConfirm?.addEventListener('click', async function () {
+              if (!deleteId) return;
+              const response = await fetch(`${root.dataset.socialLinkDeleteBase}/${deleteId}`, {
+                method: 'DELETE',
+                headers: {
+                  'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                  'Accept': 'application/json'
+                }
+              });
+              if (response.status === 401) {
+                window.location.href = root.dataset.loginPath || '/login';
+                return;
+              }
+              window.location.href = '/admin/social_links';
+            });
+          })();
+        </script>
       <% end %>
 
       <% if @resource_key == 'skills' %>

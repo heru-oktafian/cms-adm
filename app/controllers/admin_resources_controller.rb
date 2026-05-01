@@ -25,6 +25,11 @@ class AdminResourcesController < ApplicationController
       endpoint: "/api/v1/admin/experiences",
       summary: "Riwayat pengalaman kerja atau proyek profesional."
     },
+    "tools" => {
+      title: "Tools",
+      endpoint: "/api/v1/admin/tools",
+      summary: "Daftar tools dan technologies yang tampil di portfolio publik."
+    },
     "social_links" => {
       title: "Social Links",
       endpoint: "/api/v1/admin/social-links",
@@ -134,6 +139,114 @@ class AdminResourcesController < ApplicationController
     end
   end
 
+  def create_experience
+    @resource_key = "experiences"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_experience(:post, @resource[:endpoint], experience_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :created
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def update_experience
+    @resource_key = "experiences"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_experience(:patch, "#{@resource[:endpoint]}/#{params[:id]}", experience_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy_experience
+    @resource_key = "experiences"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = delete_resource("#{@resource[:endpoint]}/#{params[:id]}")
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def create_social_link
+    @resource_key = "social_links"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_social_link(:post, @resource[:endpoint], social_link_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :created
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def update_social_link
+    @resource_key = "social_links"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_social_link(:patch, "#{@resource[:endpoint]}/#{params[:id]}", social_link_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy_social_link
+    @resource_key = "social_links"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = delete_resource("#{@resource[:endpoint]}/#{params[:id]}")
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def create_tool
+    @resource_key = "tools"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_tool(:post, @resource[:endpoint], tool_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :created
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def update_tool
+    @resource_key = "tools"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_tool(:patch, "#{@resource[:endpoint]}/#{params[:id]}", tool_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy_tool
+    @resource_key = "tools"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = delete_resource("#{@resource[:endpoint]}/#{params[:id]}")
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
 
   private
 
@@ -142,7 +255,7 @@ class AdminResourcesController < ApplicationController
   end
 
   def datatable_template?
-    %w[projects skills experiences].include?(@resource_key)
+    %w[projects skills experiences tools social_links].include?(@resource_key)
   end
 
   def template_for_resource
@@ -305,8 +418,73 @@ class AdminResourcesController < ApplicationController
     permitted
   end
 
+  def submit_experience(method, path, payload)
+    uri = URI.parse("#{backend_base_url}#{path}")
+    request = build_json_request(method, uri, payload)
+    response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(request) }
+    parsed = safe_json(response.body)
+
+    if response.code.to_i.between?(200, 299)
+      { status: :ok, message: parsed["message"].presence || "Experience saved." }
+    else
+      { status: :error, message: parsed["message"].presence || "Gagal menyimpan experience." }
+    end
+  rescue StandardError => e
+    { status: :error, message: "Gagal terhubung ke backend: #{e.message}" }
+  end
+
+  def experience_params
+    permitted = params.require(:experience).permit(:company, :position, :description, :start_date, :end_date, :sort_order, :is_current).to_h
+    permitted["sort_order"] = permitted["sort_order"].to_i
+    permitted["is_current"] = ActiveModel::Type::Boolean.new.cast(permitted["is_current"])
+    permitted
+  end
+
+  def submit_social_link(method, path, payload)
+    uri = URI.parse("#{backend_base_url}#{path}")
+    request = build_json_request(method, uri, payload)
+    response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(request) }
+    parsed = safe_json(response.body)
+
+    if response.code.to_i.between?(200, 299)
+      { status: :ok, message: parsed["message"].presence || "Social link saved." }
+    else
+      { status: :error, message: parsed["message"].presence || "Gagal menyimpan social link." }
+    end
+  rescue StandardError => e
+    { status: :error, message: "Gagal terhubung ke backend: #{e.message}" }
+  end
+
+  def social_link_params
+    permitted = params.require(:social_link).permit(:platform, :label, :url, :icon_path, :sort_order).to_h
+    permitted["sort_order"] = permitted["sort_order"].to_i
+    permitted
+  end
+
+  def submit_tool(method, path, payload)
+    uri = URI.parse("#{backend_base_url}#{path}")
+    request = build_json_request(method, uri, payload)
+    response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(request) }
+    parsed = safe_json(response.body)
+
+    if response.code.to_i.between?(200, 299)
+      { status: :ok, message: parsed["message"].presence || "Tool saved." }
+    else
+      { status: :error, message: parsed["message"].presence || "Gagal menyimpan tool." }
+    end
+  rescue StandardError => e
+    { status: :error, message: "Gagal terhubung ke backend: #{e.message}" }
+  end
+
+  def tool_params
+    permitted = params.require(:tool).permit(:name, :icon_path, :url, :sort_order, :is_active).to_h
+    permitted["sort_order"] = permitted["sort_order"].to_i
+    permitted["is_active"] = ActiveModel::Type::Boolean.new.cast(permitted["is_active"])
+    permitted
+  end
+
   def profile_params
-    params.require(:profile).permit(:full_name, :headline, :sub_headline, :bio, :email, :phone, :location, :avatar_path, :resume_path)
+    params.require(:profile).permit(:full_name, :headline, :sub_headline, :hero_description, :about_description, :email, :phone, :location, :avatar_path, :resume_path)
   end
 
   def safe_json(body)

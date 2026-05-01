@@ -68,6 +68,11 @@
                 </div>
 
                 <div>
+                  <%= f.label :hero_description, "Hero description", class: "mb-2 block text-sm font-medium text-slate-700" %>
+                  <%= f.text_area :hero_description, value: profile_data["hero_description"], rows: 5, class: "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100" %>
+                </div>
+
+                <div>
                   <%= f.label :email, class: "mb-2 block text-sm font-medium text-slate-700" %>
                   <%= f.email_field :email, value: profile_data["email"], class: "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100" %>
                 </div>
@@ -90,8 +95,8 @@
                 </div>
 
                 <div>
-                  <%= f.label :bio, class: "mb-2 block text-sm font-medium text-slate-700" %>
-                  <%= f.text_area :bio, value: profile_data["bio"], rows: 5, class: "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100" %>
+                  <%= f.label :about_description, "About description", class: "mb-2 block text-sm font-medium text-slate-700" %>
+                  <%= f.text_area :about_description, value: profile_data["about_description"], rows: 6, class: "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100" %>
                 </div>
 
                 <div>
@@ -125,6 +130,14 @@
               <div class="rounded-2xl bg-slate-50 px-4 py-3">
                 <p class="text-xs uppercase tracking-[0.24em] text-slate-400">Headline</p>
                 <p class="mt-2 font-medium text-slate-900"><%= profile_data["headline"].presence || "-" %></p>
+              </div>
+              <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                <p class="text-xs uppercase tracking-[0.24em] text-slate-400">Hero description</p>
+                <p class="mt-2 font-medium text-slate-900"><%= profile_data["hero_description"].presence || "-" %></p>
+              </div>
+              <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                <p class="text-xs uppercase tracking-[0.24em] text-slate-400">About description</p>
+                <p class="mt-2 font-medium text-slate-900"><%= profile_data["about_description"].presence || "-" %></p>
               </div>
               <div class="rounded-2xl bg-slate-50 px-4 py-3">
                 <p class="text-xs uppercase tracking-[0.24em] text-slate-400">Email</p>
