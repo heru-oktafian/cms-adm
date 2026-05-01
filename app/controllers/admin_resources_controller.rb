@@ -324,9 +324,11 @@ class AdminResourcesController < ApplicationController
       "summary" => "",
       "description" => "",
       "thumbnail_path" => "",
+      "stack_items" => "",
       "project_url" => "",
       "repo_url" => "",
       "is_featured" => false,
+      "is_active" => true,
       "sort_order" => 0
     }
   end
@@ -391,8 +393,9 @@ class AdminResourcesController < ApplicationController
   end
 
   def project_params
-    permitted = params.require(:project).permit(:title, :slug, :summary, :description, :thumbnail_path, :project_url, :repo_url, :sort_order, :is_featured).to_h
+    permitted = params.require(:project).permit(:title, :slug, :summary, :description, :thumbnail_path, :stack_items, :project_url, :repo_url, :sort_order, :is_featured, :is_active).to_h
     permitted["is_featured"] = ActiveModel::Type::Boolean.new.cast(permitted["is_featured"])
+    permitted["is_active"] = ActiveModel::Type::Boolean.new.cast(permitted["is_active"])
     permitted["sort_order"] = permitted["sort_order"].to_i
     permitted
   end
@@ -413,8 +416,10 @@ class AdminResourcesController < ApplicationController
   end
 
   def skill_params
-    permitted = params.require(:skill).permit(:name, :level, :icon_path, :sort_order).to_h
+    permitted = params.require(:skill).permit(:name, :category, :level, :icon_path, :is_active, :sort_order).to_h
+    permitted["level"] = permitted["level"].to_i
     permitted["sort_order"] = permitted["sort_order"].to_i
+    permitted["is_active"] = ActiveModel::Type::Boolean.new.cast(permitted["is_active"])
     permitted
   end
 
@@ -434,9 +439,10 @@ class AdminResourcesController < ApplicationController
   end
 
   def experience_params
-    permitted = params.require(:experience).permit(:company, :position, :description, :start_date, :end_date, :sort_order, :is_current).to_h
+    permitted = params.require(:experience).permit(:company, :position, :description, :start_date, :end_date, :sort_order, :is_current, :is_active).to_h
     permitted["sort_order"] = permitted["sort_order"].to_i
     permitted["is_current"] = ActiveModel::Type::Boolean.new.cast(permitted["is_current"])
+    permitted["is_active"] = ActiveModel::Type::Boolean.new.cast(permitted["is_active"])
     permitted
   end
 
@@ -456,8 +462,9 @@ class AdminResourcesController < ApplicationController
   end
 
   def social_link_params
-    permitted = params.require(:social_link).permit(:platform, :label, :url, :icon_path, :sort_order).to_h
+    permitted = params.require(:social_link).permit(:platform, :label, :url, :icon_path, :sort_order, :is_active).to_h
     permitted["sort_order"] = permitted["sort_order"].to_i
+    permitted["is_active"] = ActiveModel::Type::Boolean.new.cast(permitted["is_active"])
     permitted
   end
 

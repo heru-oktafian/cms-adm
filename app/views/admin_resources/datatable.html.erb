@@ -3,16 +3,17 @@
   when "projects"
     [
       ["Title", ->(item) { item["title"].presence || "-" }],
-      ["Slug", ->(item) { item["slug"].presence || "-" }],
+      ["Stack", ->(item) { item["stack_items"].presence || "-" }],
       ["Featured", ->(item) { item["is_featured"] ? "Yes" : "No" }],
-      ["Sort", ->(item) { item["sort_order"].presence || 0 }],
-      ["Updated", ->(item) { item["updated_at"].presence || "-" }]
+      ["Active", ->(item) { item["is_active"] ? "Yes" : "No" }],
+      ["Sort", ->(item) { item["sort_order"].presence || 0 }]
     ]
   when "skills"
     [
       ["Name", ->(item) { item["name"].presence || "-" }],
-      ["Level", ->(item) { item["level"].presence || "-" }],
-      ["Icon", ->(item) { item["icon_path"].presence || "-" }],
+      ["Category", ->(item) { item["category"].presence || "-" }],
+      ["Level", ->(item) { item["level"].presence || 0 }],
+      ["Active", ->(item) { item["is_active"] ? "Yes" : "No" }],
       ["Sort", ->(item) { item["sort_order"].presence || 0 }]
     ]
   when "social_links"
@@ -20,6 +21,7 @@
       ["Platform", ->(item) { item["platform"].presence || "-" }],
       ["Label", ->(item) { item["label"].presence || "-" }],
       ["URL", ->(item) { item["url"].presence || "-" }],
+      ["Active", ->(item) { item["is_active"] ? "Yes" : "No" }],
       ["Sort", ->(item) { item["sort_order"].presence || 0 }]
     ]
   when "tools"
@@ -36,6 +38,7 @@
       ["Position", ->(item) { item["position"].presence || "-" }],
       ["Period", ->(item) { [item["start_date"], (item["is_current"] ? "Present" : item["end_date"])].compact.join(" → ").presence || "-" }],
       ["Current", ->(item) { item["is_current"] ? "Yes" : "No" }],
+      ["Active", ->(item) { item["is_active"] ? "Yes" : "No" }],
       ["Sort", ->(item) { item["sort_order"].presence || 0 }]
     ]
   end
@@ -293,10 +296,14 @@
                   <label class="mb-2 block text-sm font-medium text-slate-700">Sort order</label>
                   <input id="experience-sort-field" name="experience[sort_order]" type="number" value="0" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 </div>
-                <div>
+                <div class="flex flex-wrap gap-4 md:col-span-2">
                   <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                     <input id="experience-current-field" name="experience[is_current]" type="checkbox" value="true">
                     <span>Current position</span>
+                  </label>
+                  <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <input id="experience-active-field" name="experience[is_active]" type="checkbox" value="true" checked>
+                    <span>Active on public site</span>
                   </label>
                 </div>
               </div>
@@ -325,6 +332,7 @@
             const descriptionField = document.getElementById('experience-description-field');
             const sortField = document.getElementById('experience-sort-field');
             const currentField = document.getElementById('experience-current-field');
+            const activeField = document.getElementById('experience-active-field');
 
             document.querySelectorAll('[data-experience-edit]').forEach((button) => {
               button.addEventListener('click', function () {
@@ -340,6 +348,7 @@
                 if (descriptionField) descriptionField.value = experience.description || '';
                 if (sortField) sortField.value = experience.sort_order || 0;
                 if (currentField) currentField.checked = !!experience.is_current;
+                if (activeField) activeField.checked = !!experience.is_active;
                 if (feedback) feedback.classList.add('hidden');
                 modal.classList.remove('hidden');
               });
@@ -607,6 +616,12 @@
                   <label class="mb-2 block text-sm font-medium text-slate-700">Sort order</label>
                   <input id="social-link-sort-field" name="social_link[sort_order]" type="number" value="0" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 </div>
+                <div class="md:col-span-2">
+                  <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <input id="social-link-active-field" name="social_link[is_active]" type="checkbox" value="true" checked>
+                    <span>Active on public site</span>
+                  </label>
+                </div>
               </div>
               <div class="mt-6 flex flex-wrap gap-3">
                 <button id="social-link-create-submit" type="submit" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-medium text-white">Create Social Link</button>
@@ -631,6 +646,7 @@
             const urlField = document.getElementById('social-link-url-field');
             const iconField = document.getElementById('social-link-icon-field');
             const sortField = document.getElementById('social-link-sort-field');
+            const activeField = document.getElementById('social-link-active-field');
 
             document.querySelectorAll('[data-social-link-edit]').forEach((button) => {
               button.addEventListener('click', function () {
@@ -644,6 +660,7 @@
                 if (urlField) urlField.value = socialLink.url || '';
                 if (iconField) iconField.value = socialLink.icon_path || '';
                 if (sortField) sortField.value = socialLink.sort_order || 0;
+                if (activeField) activeField.checked = !!socialLink.is_active;
                 if (feedback) feedback.classList.add('hidden');
                 modal.classList.remove('hidden');
               });
@@ -743,8 +760,12 @@
                   <input id="skill-name-field" name="skill[name]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 </div>
                 <div>
-                  <label class="mb-2 block text-sm font-medium text-slate-700">Level</label>
-                  <input id="skill-level-field" name="skill[level]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Category</label>
+                  <input id="skill-category-field" name="skill[category]" type="text" placeholder="Backend & Database" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Level (%)</label>
+                  <input id="skill-level-field" name="skill[level]" type="number" min="0" max="100" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 </div>
                 <div>
                   <label class="mb-2 block text-sm font-medium text-slate-700">Icon path</label>
@@ -753,6 +774,12 @@
                 <div>
                   <label class="mb-2 block text-sm font-medium text-slate-700">Sort order</label>
                   <input id="skill-sort-field" name="skill[sort_order]" type="number" value="0" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <input id="skill-active-field" name="skill[is_active]" type="checkbox" value="true" checked>
+                    <span>Active on public site</span>
+                  </label>
                 </div>
               </div>
               <div class="mt-6 flex flex-wrap gap-3">
@@ -774,9 +801,11 @@
             const title = modal?.querySelector('h3');
             const submit = document.getElementById('skill-create-submit');
             const nameField = document.getElementById('skill-name-field');
+            const categoryField = document.getElementById('skill-category-field');
             const levelField = document.getElementById('skill-level-field');
             const iconField = document.getElementById('skill-icon-field');
             const sortField = document.getElementById('skill-sort-field');
+            const activeField = document.getElementById('skill-active-field');
 
             document.querySelectorAll('[data-skill-edit]').forEach((button) => {
               button.addEventListener('click', function () {
@@ -787,9 +816,11 @@
                 if (title) title.textContent = 'Edit Skill';
                 if (submit) submit.textContent = 'Update Skill';
                 if (nameField) nameField.value = skill.name || '';
-                if (levelField) levelField.value = skill.level || '';
+                if (categoryField) categoryField.value = skill.category || '';
+                if (levelField) levelField.value = skill.level || 0;
                 if (iconField) iconField.value = skill.icon_path || '';
                 if (sortField) sortField.value = skill.sort_order || 0;
+                if (activeField) activeField.checked = !!skill.is_active;
                 if (feedback) feedback.classList.add('hidden');
                 modal.classList.remove('hidden');
               });
@@ -897,15 +928,19 @@
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-2 block text-sm font-medium text-slate-700">Summary</label>
-                  <input data-project-field="summary" name="project[summary]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                  <input data-project-field="summary" name="project[summary]" type="text" placeholder="Short description for public project card" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-2 block text-sm font-medium text-slate-700">Description</label>
-                  <textarea data-project-field="description" name="project[description]" rows="5" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800"></textarea>
+                  <textarea data-project-field="description" name="project[description]" rows="5" placeholder="Long description for detail or future expansion" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800"></textarea>
                 </div>
                 <div>
                   <label class="mb-2 block text-sm font-medium text-slate-700">Thumbnail path</label>
                   <input data-project-field="thumbnail_path" name="project[thumbnail_path]" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-slate-700">Stack items</label>
+                  <input data-project-field="stack_items" name="project[stack_items]" type="text" placeholder="NextJS, Golang, PostgreSQL" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 </div>
                 <div>
                   <label class="mb-2 block text-sm font-medium text-slate-700">Sort order</label>
@@ -919,10 +954,14 @@
                   <label class="mb-2 block text-sm font-medium text-slate-700">Repo URL</label>
                   <input data-project-field="repo_url" name="project[repo_url]" type="url" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
                 </div>
-                <div class="md:col-span-2">
+                <div class="md:col-span-2 flex flex-wrap gap-4">
                   <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                     <input data-project-field="is_featured" name="project[is_featured]" type="checkbox" value="true">
                     <span>Featured project</span>
+                  </label>
+                  <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    <input data-project-field="is_active" name="project[is_active]" type="checkbox" value="true" checked>
+                    <span>Active on public site</span>
                   </label>
                 </div>
               </div>
