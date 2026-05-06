@@ -9,6 +9,7 @@ class DashboardController < ApplicationController
     { key: "experiences", label: "Experiences", path: "/admin/experiences" },
     { key: "tools", label: "Tools", path: "/admin/tools" },
     { key: "social_links", label: "Social Links", path: "/admin/social_links" },
+    { key: "messages", label: "Messages", path: "/admin/messages" },
     { key: "media", label: "Media", path: "/admin/media" }
   ].freeze
 

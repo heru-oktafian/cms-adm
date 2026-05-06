@@ -23,6 +23,7 @@ Rails.application.routes.draw do
   post "/admin/tools", to: "admin_resources#create_tool", as: :create_admin_tool
   patch "/admin/tools/:id", to: "admin_resources#update_tool", as: :update_admin_tool
   delete "/admin/tools/:id", to: "admin_resources#destroy_tool", as: :destroy_admin_tool
+  patch "/admin/contact-messages/:id", to: "admin_resources#update_contact_message", as: :update_admin_contact_message
 
   root "sessions#new"
 end

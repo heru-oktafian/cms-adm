@@ -35,6 +35,11 @@ class AdminResourcesController < ApplicationController
       endpoint: "/api/v1/admin/social-links",
       summary: "Link sosial dan platform publik yang terhubung ke profil."
     },
+    "messages" => {
+      title: "Messages",
+      endpoint: "/api/v1/admin/contact-messages",
+      summary: "Daftar pesan masuk dari form Hubungi Kami di website publik."
+    },
     "media" => {
       title: "Media",
       endpoint: nil,
@@ -211,6 +216,18 @@ class AdminResourcesController < ApplicationController
     end
   end
 
+  def update_contact_message
+    @resource_key = "messages"
+    @resource = RESOURCE_CONFIG[@resource_key]
+    response = submit_contact_message(:patch, "#{@resource[:endpoint]}/#{params[:id]}", contact_message_params)
+
+    if response[:status] == :ok
+      render json: { message: response[:message] }, status: :ok
+    else
+      render json: { message: response[:message] }, status: :unprocessable_entity
+    end
+  end
+
   def create_tool
     @resource_key = "tools"
     @resource = RESOURCE_CONFIG[@resource_key]
@@ -255,7 +272,7 @@ class AdminResourcesController < ApplicationController
   end
 
   def datatable_template?
-    %w[projects skills experiences tools social_links].include?(@resource_key)
+    %w[projects skills experiences tools social_links messages].include?(@resource_key)
   end
 
   def template_for_resource
@@ -416,7 +433,7 @@ class AdminResourcesController < ApplicationController
   end
 
   def skill_params
-    permitted = params.require(:skill).permit(:name, :category, :level, :icon_path, :is_active, :sort_order).to_h
+    permitted = params.require(:skill).permit(:name, :category, :level, :is_active, :sort_order).to_h
     permitted["level"] = permitted["level"].to_i
     permitted["sort_order"] = permitted["sort_order"].to_i
     permitted["is_active"] = ActiveModel::Type::Boolean.new.cast(permitted["is_active"])
@@ -483,11 +500,30 @@ class AdminResourcesController < ApplicationController
     { status: :error, message: "Gagal terhubung ke backend: #{e.message}" }
   end
 
+  def submit_contact_message(method, path, payload)
+    uri = URI.parse("#{backend_base_url}#{path}")
+    request = build_json_request(method, uri, payload)
+    response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(request) }
+    parsed = safe_json(response.body)
+
+    if response.code.to_i.between?(200, 299)
+      { status: :ok, message: parsed["message"].presence || "Message updated." }
+    else
+      { status: :error, message: parsed["message"].presence || "Gagal memperbarui pesan." }
+    end
+  rescue StandardError => e
+    { status: :error, message: "Gagal terhubung ke backend: #{e.message}" }
+  end
+
   def tool_params
     permitted = params.require(:tool).permit(:name, :icon_path, :url, :sort_order, :is_active).to_h
     permitted["sort_order"] = permitted["sort_order"].to_i
     permitted["is_active"] = ActiveModel::Type::Boolean.new.cast(permitted["is_active"])
     permitted
+  end
+
+  def contact_message_params
+    params.require(:contact_message).permit(:status, :follow_up_notes).to_h
   end
 
   def profile_params
