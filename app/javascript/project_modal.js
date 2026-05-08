@@ -18,10 +18,12 @@ function initProjectModal() {
     summary: root.querySelector('[data-project-field="summary"]'),
     description: root.querySelector('[data-project-field="description"]'),
     thumbnail_path: root.querySelector('[data-project-field="thumbnail_path"]'),
+    stack_items: root.querySelector('[data-project-field="stack_items"]'),
     project_url: root.querySelector('[data-project-field="project_url"]'),
     repo_url: root.querySelector('[data-project-field="repo_url"]'),
     sort_order: root.querySelector('[data-project-field="sort_order"]'),
-    is_featured: root.querySelector('[data-project-field="is_featured"]')
+    is_featured: root.querySelector('[data-project-field="is_featured"]'),
+    is_active: root.querySelector('[data-project-field="is_active"]')
   }
 
   if (!modal || !form) return
@@ -54,10 +56,12 @@ function initProjectModal() {
     fields.summary.value = project.summary || ''
     fields.description.value = project.description || ''
     fields.thumbnail_path.value = project.thumbnail_path || ''
+    fields.stack_items.value = project.stack_items || ''
     fields.project_url.value = project.project_url || ''
     fields.repo_url.value = project.repo_url || ''
     fields.sort_order.value = project.sort_order || 0
     fields.is_featured.checked = !!project.is_featured
+    fields.is_active.checked = !!project.is_active
   }
 
   root.querySelectorAll('[data-project-create]').forEach((button) => {

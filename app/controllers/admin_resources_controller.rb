@@ -516,7 +516,7 @@ class AdminResourcesController < ApplicationController
   end
 
   def tool_params
-    permitted = params.require(:tool).permit(:name, :icon_path, :url, :sort_order, :is_active).to_h
+    permitted = params.require(:tool).permit(:name, :icon_text, :url, :sort_order, :is_active).to_h
     permitted["sort_order"] = permitted["sort_order"].to_i
     permitted["is_active"] = ActiveModel::Type::Boolean.new.cast(permitted["is_active"])
     permitted
