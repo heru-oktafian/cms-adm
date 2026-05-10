@@ -4,13 +4,12 @@ class DashboardController < ApplicationController
   MENU_ITEMS = [
     { key: "dashboard", label: "Dashboard", path_helper: :dashboard_path },
     { key: "profile", label: "Profile", path: "/admin/profile" },
-    { key: "projects", label: "Projects", path: "/admin/projects" },
     { key: "skills", label: "Skills", path: "/admin/skills" },
-    { key: "experiences", label: "Experiences", path: "/admin/experiences" },
     { key: "tools", label: "Tools", path: "/admin/tools" },
+    { key: "projects", label: "Projects", path: "/admin/projects" },
+    { key: "experiences", label: "Experiences", path: "/admin/experiences" },
     { key: "social_links", label: "Social Links", path: "/admin/social_links" },
-    { key: "messages", label: "Messages", path: "/admin/messages" },
-    { key: "media", label: "Media", path: "/admin/media" }
+    { key: "messages", label: "Messages", path: "/admin/messages" }
   ].freeze
 
   helper_method :navigation_items
