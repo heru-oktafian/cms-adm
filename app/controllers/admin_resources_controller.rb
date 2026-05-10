@@ -297,7 +297,7 @@ class AdminResourcesController < ApplicationController
 
     if response.code.to_i == 200
       data = payload["data"]
-      items = data.is_a?(Array) ? data : (data.present? ? [data] : [])
+      items = data.is_a?(Array) ? data : (data.present? ? [ data ] : [])
       { status: :ok, items: items, raw: data, message: payload["message"].presence || "Data loaded." }
     else
       { status: :error, items: [], raw: payload, message: payload["message"].presence || "Gagal mengambil data dari backend." }
@@ -398,10 +398,10 @@ class AdminResourcesController < ApplicationController
 
   def build_json_request(method, uri, payload)
     request_class = case method.to_sym
-                    when :post then Net::HTTP::Post
-                    when :patch then Net::HTTP::Put
-                    else Net::HTTP::Post
-                    end
+    when :post then Net::HTTP::Post
+    when :patch then Net::HTTP::Put
+    else Net::HTTP::Post
+    end
     request = request_class.new(uri)
     request["Authorization"] = "Bearer #{admin_token}"
     request["Content-Type"] = "application/json"
