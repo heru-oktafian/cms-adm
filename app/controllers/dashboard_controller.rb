@@ -12,9 +12,11 @@ class DashboardController < ApplicationController
     { key: "messages", label: "Messages", path: "/admin/messages" }
   ].freeze
 
-  helper_method :navigation_items
+  helper_method :navigation_items, :dashboard_stats
 
-  def index; end
+  def index
+    @stats = dashboard_stats
+  end
 
   private
 
@@ -22,5 +24,22 @@ class DashboardController < ApplicationController
     MENU_ITEMS.map do |item|
       item.merge(path: item[:path] || send(item[:path_helper]))
     end
+  end
+
+  def dashboard_stats
+    counts = backend_get_json("/api/v1/admin/counts")
+    return default_stats if counts.nil?
+    {
+      skills: counts["skills"] || 0,
+      projects: counts["projects"] || 0,
+      experiences: counts["experiences"] || 0,
+      messages: counts["messages"] || 0
+    }
+  rescue
+    default_stats
+  end
+
+  def default_stats
+    { skills: 0, projects: 0, experiences: 0, messages: 0 }
   end
 end

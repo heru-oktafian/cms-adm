@@ -76,10 +76,10 @@
 
       <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <% stats = [
-          ["Profile", "01", "Main identity configured"],
-          ["Projects", "01", "Core portfolio collection"],
-          ["Skills", "01", "Technology overview"],
-          ["Experiences", "01", "Career timeline ready"]
+          ["Skills", @stats[:skills], "Technology expertise count"],
+          ["Projects", @stats[:projects], "Portfolio project collection"],
+          ["Experiences", @stats[:experiences], "Career timeline entries"],
+          ["Messages", @stats[:messages], "Contact form submissions"]
         ] %>
 
         <% stats.each do |label, value, note| %>

@@ -4,7 +4,7 @@ require "json"
 class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
-  helper_method :admin_logged_in?, :navigation_items, :active_nav_key
+  helper_method :admin_logged_in?, :navigation_items, :active_nav_key, :backend_base_url
 
   private
 
@@ -84,5 +84,17 @@ class ApplicationController < ActionController::Base
 
     resource = params[:resource].presence
     resource&.to_s
+  end
+
+  def backend_get_json(path)
+    uri = URI.parse("#{backend_base_url}#{path}")
+    request = Net::HTTP::Get.new(uri)
+    request["Authorization"] = "Bearer #{admin_token}"
+    response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(request) }
+    return nil unless response.code.to_i.between?(200, 299)
+    JSON.parse(response.body)["data"]
+  rescue StandardError => e
+    Rails.logger.error("[cms-adm] GET #{path} failed: #{e.class}: #{e.message}")
+    nil
   end
 end
